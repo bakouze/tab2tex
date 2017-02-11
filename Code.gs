@@ -20,9 +20,9 @@ function getCurrentCellFormat(row, col){
   var cell = sheet.getDataRange().getCell(row+1, col+1);
 
   //get cell background color
-  var backgroundColor = cell.getBackground();
+  var backgroundColor = cell.getBackground().substr(1);
   //get cell font color
-  var fontColor = cell.getFontColor();
+  var fontColor = cell.getFontColor().substr(1);
   //get cell style (italic or normal)
   var fontStyle = cell.getFontStyle();
   //get cell weight
@@ -55,10 +55,10 @@ function createTabBody() {
         nbFormat ++;
         tab += "\\textbf{"
       }
-      //if (currentCellF.color != "black") {
-      //  nbFormat ++;
-      //  tab += "\\textcolor{"+ currentCellF.color +"}{"
-      //}
+      if (currentCellF.color != "000000") {
+        nbFormat ++;
+        tab += "\\color[HTML]{"+ currentCellF.color +"}{"
+      }
 
       //the cell value
       tab += data[i][j];
