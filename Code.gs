@@ -6,6 +6,33 @@ function getValues(){
   return data;
 }
 
+function cellFormat(style, weight, color, bgColor){
+  this.style = style;
+  this.weight = weight;
+  this.color = color;
+  this.bgColor = bgColor;
+}
+
+function getCurrentCellFormat(row, col){
+  //get active sheet
+  var sheet = SpreadsheetApp.getActiveSheet();
+  //get current cell (begin at 1, hence the +1s)
+  var cell = sheet.getDataRange().getCell(row+1, col+1);
+
+  //get cell background color
+  var backgroundColor = cell.getBackground();
+  //get cell font color
+  var fontColor = cell.getFontColor();
+  //get cell style (italic or normal)
+  var fontStyle = cell.getFontStyle();
+  //get cell weight
+  var fontWeight = cell.getFontWeight();
+
+  //initialize cellFormat var
+  var cellF = new cellFormat(fontStyle,fontWeight,fontColor,backgroundColor);
+  return cellF;
+}
+
 function createTabBody() {
   data = getValues();
   //initialize tex tab string
@@ -15,8 +42,33 @@ function createTabBody() {
       if(j>0){
         tab += "&";
       }
+      //handle cell format:
+      var currentCellF = getCurrentCellFormat(i,j);
+      Logger.log(currentCellF.color);
+      //var to store number of formatting on this cell (to know how many "}" to close)
+      var nbFormat = 0
+      if (currentCellF.style == "italic") {
+        nbFormat ++;
+        tab += "\\textit{"
+      }
+      if (currentCellF.weight == "bold") {
+        nbFormat ++;
+        tab += "\\textbf{"
+      }
+      //if (currentCellF.color != "black") {
+      //  nbFormat ++;
+      //  tab += "\\textcolor{"+ currentCellF.color +"}{"
+      //}
+
+      //the cell value
       tab += data[i][j];
-      Logger.log(': Row'+ i + ' Col: ' + j + ' '+ data[i][j]);
+
+      //close the right number of "}":
+      if (nbFormat>0) {
+        for (var k = 0; k < nbFormat; k++) {
+          tab += "}";
+        }
+      }
     }
     tab += "\\\\ \\hline"
     if(i < data.length -1){
@@ -39,11 +91,11 @@ function createFile(){
   }
   //create header of tex table
   var head = "\\begin{table}[H] \n\\begin{center} \n\\begin{tabular}{"+ tabAlign +"}";
-  
+
   //create footer of tex table
   var foot = "\\end{tabular} \n\\end{center} \n\\caption{"+ SpreadsheetApp.getActiveSheet().getName() +"} \n\\end{table}";
-  
-  // Access the body of the document, then add a paragraph.  
+
+  // Access the body of the document, then add a paragraph.
   doc.getBody().appendParagraph(head);
   doc.getBody().appendParagraph(createTabBody());
   doc.getBody().appendParagraph(foot);
