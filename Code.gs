@@ -59,6 +59,9 @@ function createTabBody() {
         nbFormat ++;
         tab += "\\color[HTML]{"+ currentCellF.color +"}{"
       }
+      if (currentCellF.bgColor != "ffffff") {
+        tab += "{\\cellcolor[HTML]{"+ currentCellF.bgColor +"}}"
+      }
 
       //the cell value
       tab += data[i][j];
