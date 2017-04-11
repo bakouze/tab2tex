@@ -1,3 +1,44 @@
+/**
+ * Creates a menu entry in the Google Docs UI when the document is opened.
+ * This method is only used by the regular add-on, and is never called by
+ * the mobile add-on version.
+ *
+ * @param {object} e The event parameter for a simple onOpen trigger. To
+ *     determine which authorization mode (ScriptApp.AuthMode) the trigger is
+ *     running in, inspect e.authMode.
+ */
+function onOpen(e) {
+  SpreadsheetApp.getUi().createAddonMenu()
+      .addItem('Start', 'showSidebar')
+      .addToUi();
+}
+
+/**
+ * Runs when the add-on is installed.
+ * This method is only used by the regular add-on, and is never called by
+ * the mobile add-on version.
+ *
+ * @param {object} e The event parameter for a simple onInstall trigger. To
+ *     determine which authorization mode (ScriptApp.AuthMode) the trigger is
+ *     running in, inspect e.authMode. (In practice, onInstall triggers always
+ *     run in AuthMode.FULL, but onOpen triggers may be AuthMode.LIMITED or
+ *     AuthMode.NONE.)
+ */
+function onInstall(e) {
+  onOpen(e);
+}
+
+/**
+ * Opens a sidebar in the document containing the add-on's user interface.
+ * This method is only used by the regular add-on, and is never called by
+ * the mobile add-on version.
+ */
+function showSidebar() {
+  var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
+      .setTitle('Tab2TeX');
+  SpreadsheetApp.getUi().showSidebar(ui);
+}
+
 function getValues(){
   //get active sheet
   var sheet = SpreadsheetApp.getActiveSheet();
@@ -75,7 +116,7 @@ function createTabBody() {
     }
     tab += "\\\\ \\hline"
     if(i < data.length -1){
-      tab += "\n";
+      tab += "\n <br>";
     }
   }
   return tab;
@@ -102,4 +143,24 @@ function createFile(){
   doc.getBody().appendParagraph(head);
   doc.getBody().appendParagraph(createTabBody());
   doc.getBody().appendParagraph(foot);
+}
+
+function createTab(){
+  //get number of col in table
+  var nbCol = getValues()[0].length;
+  //create |c|c|...|c|
+  var tabAlign = "|";
+  for(var i = 0; i < nbCol; i++){
+    tabAlign += "c|";
+  }
+  //create header of tex table
+  var head = "\\begin{table}[H] \n<br>\\begin{center} \n<br>\\begin{tabular}{"+ tabAlign +"}";
+
+  //create footer of tex table
+  var foot = "\\end{tabular} \n<br>\\end{center} \n<br>\\caption{"+ SpreadsheetApp.getActiveSheet().getName() +"} \n<br>\\end{table}";
+
+  // create body of tex table
+  var body = createTabBody();
+  
+  return head + '<br>'+ body +'<br>'+ foot;
 }
